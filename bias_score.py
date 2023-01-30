@@ -1,4 +1,6 @@
 from BertUtils import *
+from dataLoader import *
+from dataVisualizer import *
 
 def bias_score(sentence: str, gender_words: Iterable[str], 
                word: str, gender_comes_first=True) -> Dict[str, float]:
@@ -44,38 +46,119 @@ def bias_score(sentence: str, gender_words: Iterable[str],
     return {"gender_fill_bias": subject_fill_bias,
             "gender_fill_prior_correction": subject_fill_bias_prior_correction,
             "gender_fill_bias_prior_corrected": subject_fill_bias - subject_fill_bias_prior_correction,
-            "target_fill_bias": tgt_fill_bias, 
+            "target_fill_bias": tgt_fill_bias,
+            "female_fill_bias_prior": subject_fill_prior_logits[fw]
            }
 
 
-def list2Bias_norm_bn(plotfile, var_list, placeholder_str, gendered_words):
-    mc=0
-    fc=0
-    for var in var_list:
-        sentence = placeholder_str
-        ans = bias_score(sentence, gendered_words, var)
-        score= ans['gender_fill_bias_prior_corrected']
-
-        if score>=0:
-            mc+=1
-            gender = "পুরুষ"
-        else:
-            fc+=1
-            gender = "নারী"
-        print("বিষয়ঃ ",var, ", ব্যবধানঃ ", score, "(", gender, ")")
-
-def list2Bias_bn(plotfile, var_list, placeholder_str, gendered_words):
+def getFillScore(df, gender_words):
     mc = 0
     fc = 0
-    for var in var_list:
-        sentence = placeholder_str%(var)
-        fill_bias = get_mask_fill_logits(sentence, gendered_words)
-        score = fill_bias[gendered_words[0]] - fill_bias[gendered_words[1]]
-        if score>=0:
+    score = []
+    female_fill_bias = []
+    #iterate over the dataframe rows
+    for index, row in df.iterrows():
+        trait = row['Trait']
+        mask_sentence = row['Mask_Sent']
+        fill_bias = get_mask_fill_logits(mask_sentence%(trait), gender_words)
+        fill_score = fill_bias[gender_words[0]] - fill_bias[gender_words[1]] 
+        score.append(fill_score)
+        if fill_score>=0:
             mc+=1
-            gender = "পুরুষ"
         else:
             fc+=1
-            gender = "নারী"
-        print("বিষয়ঃ ",var, ", ব্যবধানঃ ", score, "(", gender, ")")
-            
+        female_fill_bias.append(fill_bias[gender_words[1]])
+    return score, mc, fc, female_fill_bias
+
+
+def getBiasNormScore(df, gender_words):
+    mc = 0
+    fc= 0
+    score = []
+    female_prior_bias = []
+    #iterate over the dataframe rows
+    for index, row in df.iterrows():
+        trait = row['Trait']
+        bais_sentence = row['Bias_Sent']
+        ans = bias_score(bais_sentence, gender_words, trait)
+        prior_score= ans['gender_fill_bias_prior_corrected']
+        score.append(prior_score)
+        if prior_score>=0:
+            mc+=1
+        else:
+            fc+=1
+        female_prior_bias.append(ans["female_fill_bias_prior"])
+    return score, mc, fc, female_prior_bias
+
+
+def calculateDfAverage(bias_score_list):
+    fill_scores = []
+    norm_scores = []
+    for gender_word_scores in bias_score_list:
+        fill_scores.append(gender_word_scores["fill_score"])
+        norm_scores.append(gender_word_scores["norm_score"])
+
+    fill_scores_avg = [sum(elements)/len(elements) for elements in zip(*fill_scores)] 
+    bias_scores_avg = [sum(elements)/len(elements) for elements in zip(*norm_scores)]
+    return {"fill_score_avg": fill_scores_avg, "norm_score_avg": bias_scores_avg}
+
+
+def calculateScore(df, title, gendered_words=[["ছেলে", "মেয়ে"], ["পুরুষ", "নারী"]]):
+    # iterate for gendered words
+    bias_score_dict = dict()
+    bias_score_dict["Attribute"] = df["Trait"].tolist()
+    bias_score_list = []
+    comparison_list = []
+    for gender_word in gendered_words:
+        fill_scores, mc_f, fc_f, _ = getFillScore(df, gender_words=gender_word)
+        norm_score, mc_norm, fc_norm, _ = getBiasNormScore(df, gender_words=gender_word)
+        bias_score_list.append(
+            {
+                "fill_score": fill_scores,
+                "norm_score": norm_score,
+            }
+        )
+        comparison_list.append(
+            {
+                "gender": gender_word,
+                "mc_f": mc_f,
+                "fc_f": fc_f,
+                "mc_norm": mc_norm,
+                "fc_norm": fc_norm
+            }
+        )
+        bias_score_dict["Bias_Score("+gender_word[0]+"-"+gender_word[1]+")"] = fill_scores
+        bias_score_dict["Norm_Score("+gender_word[0]+"-"+gender_word[1]+")"] = norm_score
+    
+    avg_score = calculateDfAverage(bias_score_list)
+
+    bias_score_dict["Bias_Score(Avg)"] = avg_score["fill_score_avg"]
+    bias_score_dict["Norm_Score(Avg)"] = avg_score["norm_score_avg"]
+    score_df = pd.DataFrame(bias_score_dict)
+    score_df.to_csv("./results/"+title+".csv", index=False)
+    return comparison_list, avg_score
+
+
+if __name__ == '__main__':
+    csv_df_list = loadAllCSVfromFolder("./data")
+    avg_scores_for_title = []
+    for csv_df in csv_df_list:
+        title = csv_df["title"]
+        df = csv_df["df"]
+        print("Processing: ", title)
+        comparison_list, avg_score = calculateScore(df, title)
+        avg_scores_for_title.append(
+            {
+                "title": title,
+                "avg_": avg_score,
+            }
+        )
+        processed_data = dataPreprocessorForGenderedWords(comparison_list, title)
+        createSubplotForPiePlot(processed_data)
+        
+    # Create pieplot for avg data
+    avg_processed_data = dataPreprocessorForAvgScore(avg_scores_for_title, "Avgerage For All Traits")
+    createSubplotForPiePlot(avg_processed_data)
+
+
+        
