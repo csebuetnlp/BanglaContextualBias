@@ -20,7 +20,6 @@ import matplotlib.pyplot as plt
 import math
 
 font_prop = fm.FontProperties(fname='./kalpurush.ttf')
-# plt.rcParams['font.family'] = font_prop.get_name()
 
 def createSubplotForPiePlot(data, save=True):
     title = data["title"]
