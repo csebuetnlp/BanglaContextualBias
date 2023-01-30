@@ -15,9 +15,12 @@ The format for data argument in createSubplotForPiePlot() is:
     } 
 
 '''
-
+import matplotlib.font_manager as fm
 import matplotlib.pyplot as plt
 import math
+
+font_prop = fm.FontProperties(fname='kalpurush.ttf')
+plt.rcParams['font.family'] = font_prop.get_name()
 
 def createSubplotForPiePlot(data, save=True):
     title = data["title"]
@@ -34,9 +37,9 @@ def createSubplotForPiePlot(data, save=True):
         values = d["values"]
         norm_values = d["norm_values"]
         axs[(2*i)//cols,(2*i)%cols].pie(values, labels=labels, autopct='%.2f%%')
-        axs[(2*i)//cols,(2*i)%cols].set_title("Fill Score")
+        axs[(2*i)//cols,(2*i)%cols].set_title(d["subTitle"]+"_Fill Score")
         axs[(2*i + 1)//cols,(2*i + 1)%cols].pie(norm_values, labels=labels, autopct='%.2f%%')
-        axs[(2*i + 1)//cols,(2*i + 1)%cols].set_title("Norm Score")
+        axs[(2*i + 1)//cols,(2*i + 1)%cols].set_title(d["subTitle"]+"_Norm Score")
 
     if save:
         plt.savefig("./results/"+title+".png")
