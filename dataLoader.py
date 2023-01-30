@@ -13,11 +13,11 @@ def loadAllCSVfromFolder(folderPath = 'data/'):
             csvFiles.append(file)
     csv_files_list = []
     for i in range(len(csvFiles)):
-        df = csvLoader(csvFiles[i], folderPath)
+        df = csvLoader(csvFiles[i])
         csv_files_list.append(
             {
                 "df": df,
-                "filename": csvFiles[i].split(".")[0],
+                "title": csvFiles[i].split(".")[0],
             }
         )
     return csv_files_list

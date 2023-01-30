@@ -135,7 +135,7 @@ def calculateScore(df, title, gendered_words=[["ছেলে", "মেয়ে"], 
     bias_score_dict["Bias_Score(Avg)"] = avg_score["fill_score_avg"]
     bias_score_dict["Norm_Score(Avg)"] = avg_score["norm_score_avg"]
     score_df = pd.DataFrame(bias_score_dict)
-    score_df.to_csv("./results/"+title+".csv", index=False)
+    score_df.to_csv("./results/"+title+"_scores.csv", index=False)
     return comparison_list, avg_score
 
 
@@ -155,7 +155,7 @@ if __name__ == '__main__':
         )
         processed_data = dataPreprocessorForGenderedWords(comparison_list, title)
         createSubplotForPiePlot(processed_data)
-        
+
     # Create pieplot for avg data
     avg_processed_data = dataPreprocessorForAvgScore(avg_scores_for_title, "Avgerage For All Traits")
     createSubplotForPiePlot(avg_processed_data)
