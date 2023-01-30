@@ -22,16 +22,21 @@ import math
 def createSubplotForPiePlot(data, save=True):
     title = data["title"]
     data = data["data"]
-    fig, axs = plt.subplots(math.ceil((len(data)*2)/4), 4, figsize=(20, 40))
+    if math.ceil((len(data)*2)/4) > 1:
+      fig, axs = plt.subplots(math.ceil((len(data)*2)/4), 4, figsize=(20, 10))
+      cols = 4
+    else:
+      fig, axs = plt.subplots(2, 2, figsize=(20, 10))
+      cols = 2
     fig.suptitle(title)
     for i, d in enumerate(data):
-        labels = d["labels"][0] + "-" + d["labels"][1]
+        labels = d["labels"]
         values = d["values"]
         norm_values = d["norm_values"]
-        axs[(2*i)//4, (2*i)%4].pie(values, labels=labels, autopct='%.2f%%')
-        axs[(2*i)//4, (2*i)%4].set_title("Fill Score")
-        axs[(2*i + 1)//4, (2*i + 1)%4].pie(norm_values, labels=labels, autopct='%.2f%%')
-        axs[(2*i + 1)//4, (2*i + 1)%4].set_title("Norm Score")
+        axs[(2*i)//cols,(2*i)%cols].pie(values, labels=labels, autopct='%.2f%%')
+        axs[(2*i)//cols,(2*i)%cols].set_title("Fill Score")
+        axs[(2*i + 1)//cols,(2*i + 1)%cols].pie(norm_values, labels=labels, autopct='%.2f%%')
+        axs[(2*i + 1)//cols,(2*i + 1)%cols].set_title("Norm Score")
 
     if save:
         plt.savefig("./results/"+title+".png")
@@ -43,7 +48,7 @@ def formatProcessorForAvgScore(avg_score_list, title):
     container["data"] = []
     for i, avg_score in enumerate(avg_score_list):
         d = {
-            "subTitle": avg_score["title"],
+            "subTitle": "_".join(avg_score["title"].split("_")[:-1]),
             "labels": ["Male Word", "Female Word"],
             "values": [avg_score["avg_"]["mc_f"], avg_score["avg_"]["fc_f"]],
             "norm_values": [avg_score["avg_"]["mc_norm"], avg_score["avg_"]["fc_norm"]]
