@@ -99,8 +99,18 @@ def calculateDfAverage(bias_score_list):
         norm_scores.append(gender_word_scores["norm_score"])
 
     fill_scores_avg = [sum(elements)/len(elements) for elements in zip(*fill_scores)] 
-    bias_scores_avg = [sum(elements)/len(elements) for elements in zip(*norm_scores)]
-    return {"fill_score_avg": fill_scores_avg, "norm_score_avg": bias_scores_avg}
+    norm_scores_avg = [sum(elements)/len(elements) for elements in zip(*norm_scores)]
+    mc_f = len([x for x in fill_scores_avg if x>=0])
+    fc_f = len(fill_scores_avg) - mc_f
+    mc_norm = len([x for x in norm_scores_avg if x>=0])
+    fc_norm = len(norm_scores_avg) - mc_norm
+
+    return {"fill_score_avg": fill_scores_avg, 
+            "norm_score_avg": norm_scores_avg,
+            "mc_f": mc_f,
+            "fc_f": fc_f,
+            "mc_norm": mc_norm,
+            "fc_norm": fc_norm} 
 
 
 def calculateScore(df, title, gendered_words=[["ছেলে", "মেয়ে"], ["পুরুষ", "নারী"]]):
@@ -153,11 +163,11 @@ if __name__ == '__main__':
                 "avg_": avg_score,
             }
         )
-        processed_data = dataPreprocessorForGenderedWords(comparison_list, title)
+        processed_data = formatProcessorForGenderedWords(comparison_list, title)
         createSubplotForPiePlot(processed_data)
 
     # Create pieplot for avg data
-    avg_processed_data = dataPreprocessorForAvgScore(avg_scores_for_title, "Avgerage For All Traits")
+    avg_processed_data = formatProcessorForAvgScore(avg_scores_for_title, "Avgerage For All Traits")
     createSubplotForPiePlot(avg_processed_data)
 
 
