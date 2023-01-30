@@ -19,8 +19,8 @@ import matplotlib.font_manager as fm
 import matplotlib.pyplot as plt
 import math
 
-font_prop = fm.FontProperties(fname='kalpurush.ttf')
-plt.rcParams['font.family'] = font_prop.get_name()
+font_prop = fm.FontProperties(fname='./kalpurush.ttf')
+# plt.rcParams['font.family'] = font_prop.get_name()
 
 def createSubplotForPiePlot(data, save=True):
     title = data["title"]
@@ -36,11 +36,16 @@ def createSubplotForPiePlot(data, save=True):
         labels = d["labels"]
         values = d["values"]
         norm_values = d["norm_values"]
-        axs[(2*i)//cols,(2*i)%cols].pie(values, labels=labels, autopct='%.2f%%')
-        axs[(2*i)//cols,(2*i)%cols].set_title(d["subTitle"]+"_Fill Score")
-        axs[(2*i + 1)//cols,(2*i + 1)%cols].pie(norm_values, labels=labels, autopct='%.2f%%')
-        axs[(2*i + 1)//cols,(2*i + 1)%cols].set_title(d["subTitle"]+"_Norm Score")
-
+        _, texts, _ = axs[(2*i)//cols,(2*i)%cols].pie(values, labels=labels, autopct='%.2f%%')
+        axs[(2*i)//cols,(2*i)%cols].set_title(d["subTitle"]+"_Fill Score", fontproperties=font_prop)
+        for text in texts:
+          text.set_fontproperties(font_prop)
+        
+        _, texts, _ = axs[(2*i + 1)//cols,(2*i + 1)%cols].pie(norm_values, labels=labels, autopct='%.2f%%')
+        axs[(2*i + 1)//cols,(2*i + 1)%cols].set_title(d["subTitle"]+"_Norm Score", fontproperties=font_prop)
+        
+        for text in texts:
+          text.set_fontproperties(font_prop)
     if save:
         plt.savefig("./results/"+title+".png")
     plt.show()
@@ -67,8 +72,8 @@ def formatProcessorForGenderedWords(compare_list, title):
     container["data"] = []
     for i, c in enumerate(compare_list):
         d = {
-            "subTitle": c["gender"][0] + "-" + c["gender"][1],
-            "labels": c["gender"],
+            "subTitle": u"%s"%(c["gender"][0]) + "-" + u"%s"%(c["gender"][1]),
+            "labels": [u"%s"%(gender_word) for gender_word in c["gender"]],
             "values": [c["mc_f"], c["fc_f"]],
             "norm_values": [c["mc_norm"], c["fc_norm"]]
         }
