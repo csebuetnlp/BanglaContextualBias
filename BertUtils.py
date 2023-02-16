@@ -46,3 +46,18 @@ def get_mask_fill_logits(sentence: str, words: Iterable[str], use_last_mask=Fals
       out_logits = softmax(out_logits)
   return {w: out_logits[0, mask_i, tokenizer.encode(w)[1]] for w in words}
 
+def get_word_vector(sentence, word):
+  normalized_sent = normalize(sentence)
+  # print(normalized_sent)
+  input_token = tokenizer(normalized_sent, return_tensors="pt")
+  # print(input_token)
+  sent_list = sentence.split(' ')
+  idx = sent_list.index(word) + 1 # for [CLS]
+  # print(f'{sentence} \n {word} -- {idx}')
+  with torch.no_grad():
+    outputs = model(**input_token)
+    # return outputs[1][24][0][idx]
+    return outputs[1][24][0].detach().cpu().numpy()[idx]
+  
+def cosine_similarity(x, y):
+    return np.dot(x, y) / (np.linalg.norm(x) * np.linalg.norm(y))

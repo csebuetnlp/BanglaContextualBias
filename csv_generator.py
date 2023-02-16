@@ -2,7 +2,7 @@ import pandas as pd
 
 def readFile(filename):
     container = []
-    with open(filename, "r") as fp:
+    with open(filename, "r", encoding='utf-8') as fp:
         lines = fp.readlines()
         for line in lines:
             if line != "":
