@@ -50,6 +50,42 @@ def bias_score(sentence: str, gender_words: Iterable[str],
             "female_fill_bias_prior": subject_fill_prior_logits[fw]
            }
 
+def bias_score_weat(sentence: str, gender_words: Iterable[Iterable[str]], 
+               word: str, gender_comes_first=True) -> Dict[str, float]:
+    """
+    Input a sentence of the form "GGG is XXX"
+    XXX is a placeholder for the target word
+    GGG is a placeholder for the gendered words (the subject)
+    We will predict the bias when filling in the gendered words and 
+    filling in the target word.
+    
+    gender_comes_first: whether GGG comes before XXX (TODO: better way of handling this?)
+    """
+    # probability of filling [MASK] with "he" vs. "she" when target is "programmer"
+    mwords, fwords = gender_words
+    all_words = mwords + fwords
+    subject_fill_logits = get_mask_fill_logits(
+        sentence.replace("XXX", word).replace("GGG", "[MASK]"), 
+        all_words, use_last_mask=not gender_comes_first,
+    )
+    subject_fill_bias = np.log(sum(subject_fill_logits[mw] for mw in mwords)) - \
+                        np.log(sum(subject_fill_logits[fw] for fw in fwords))
+    # male words are simply more likely than female words
+    # correct for this by masking the target word and measuring the prior probabilities
+    subject_fill_prior_logits = get_mask_fill_logits(
+        sentence.replace("XXX", "[MASK]").replace("GGG", "[MASK]"), 
+        all_words, use_last_mask=gender_comes_first,
+    )
+    subject_fill_bias_prior_correction = \
+            np.log(sum(subject_fill_prior_logits[mw] for mw in mwords)) - \
+            np.log(sum(subject_fill_prior_logits[fw] for fw in fwords))
+    
+    return {
+          "stimulus": word,
+          "bias": subject_fill_bias,
+          "prior_correction": subject_fill_bias_prior_correction,
+          "bias_prior_corrected": subject_fill_bias - subject_fill_bias_prior_correction,
+          }
 
 def getFillScore(df, gender_words):
     mc = 0
