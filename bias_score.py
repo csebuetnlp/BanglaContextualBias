@@ -167,7 +167,7 @@ if __name__ == '__main__':
         createSubplotForPiePlot(processed_data)
 
     # Create pieplot for avg data
-    avg_processed_data = formatProcessorForAvgScore(avg_scores_for_title, "Avgerage For All Traits")
+    avg_processed_data = formatProcessorForAvgScore(avg_scores_for_title, "Average For All Traits")
     createSubplotForPiePlot(avg_processed_data)
 
 
