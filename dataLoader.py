@@ -43,7 +43,7 @@ def processDFSentence(csv_files_list):
         df = csv_file_list["df"]
         df.fillna("", inplace=True)
         columns = df.columns.tolist()
-        print(columns)
+        # print(columns)
         sent_idx = int(csv_file_list["title"][-1])
         mask_sent = getFormattedStruSentence(sent_idx)
         bias_sent = mask_sent.replace("[MASK]", "GGG").replace("%s", "XXX")
@@ -75,18 +75,58 @@ def loadAllCSVfromFolder(folderPath = 'data/'):
     csv_files_list = []
     for i in range(len(csvFiles)):
         csv_element = csvLoader(csvFiles[i])
-        for element in csv_element:
-            csv_files_list.append(
-                element
-            )
+        group_title = csvFiles[i].split('.')[0]
+        csv_files_list.append(
+            {
+                "title": group_title,
+                "group": processDFSentence(csv_element),
+            }
+            
+        )
     
     # return csv_files_list
-    return processDFSentence(csv_files_list)
+    return csv_files_list
+
+'''
+csv_files_list = [
+    {
+        "title": "group_title",
+        "group": [
+            {
+                "df": df,
+                "title": "group_title_1"
+            },
+            {
+                "df": df,
+                "title": "group_title_2"
+            }
+            .....    
+        
+        ]
+    }
+    {
+        "title": "group_title",
+        "group": [
+        ...
+        ]
+    }
+    ....
+
+]
+
+'''
+
+def getGenderedWords():
+    return [["ছেলে", "মেয়ে"], ["পুরুষ", "নারী"]]
 
 
 if __name__ == '__main__':
     csv_files_list = loadAllCSVfromFolder()
-    for csv_file_list in csv_files_list:
-        print(csv_file_list["title"])
-        print(csv_file_list["df"].head())
-        csv_file_list["df"].to_csv("./example/"+csv_file_list["title"]+".csv", index=False)
+    for csv_file in csv_files_list:
+        print(csv_file["title"])
+        elements = csv_file["group"]
+        print("Groups")
+        for csv_file_list in elements:
+            print(csv_file_list["title"])
+            # print(csv_file_list["df"].head())
+            # csv_file_list["df"].to_csv("./example/"+csv_file_list["title"]+".csv", index=False)
