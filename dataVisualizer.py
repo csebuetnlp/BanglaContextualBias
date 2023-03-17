@@ -49,6 +49,14 @@ def createSubplotForPiePlot(data, save=True):
         plt.savefig("./results/"+title+".png")
     plt.show()
 
+# def formatProcessorForGroupAvgScore(avg_score_list, title):
+#     container = {}
+#     container["title"] = title
+#     container["data"] = []
+#     for i, avg_score in enumerate(avg_score_list):
+#       pass 
+#     return container
+
 def formatProcessorForAvgScore(avg_score_list, title):
     container = {}
     container["title"] = title

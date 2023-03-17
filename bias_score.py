@@ -1,6 +1,8 @@
 from BertUtils import *
 from dataLoader import *
 from dataVisualizer import *
+from collections import defaultdict
+import pandas as pd
 
 def bias_score(sentence: str, gender_words: Iterable[str], 
                word: str, gender_comes_first=True) -> Dict[str, float]:
@@ -149,7 +151,28 @@ def calculateDfAverage(bias_score_list):
             "fc_norm": fc_norm} 
 
 
-def calculateScore(df, title, gendered_words=[["ছেলে", "মেয়ে"], ["পুরুষ", "নারী"]]):
+def calculateListAvg(list_container, aggregate_key = None, delete_key = None):
+    if aggregate_key is None:
+        result_dict = defaultdict(float)
+        for item in list_container:
+            for key, value in item.items():
+                result_dict[key] += value
+
+        total_dict = len(list_container)
+        average_dict = {key: value/total_dict for key, value in result_dict.items()}
+
+        return average_dict
+    
+    else:
+        result_df = pd.DataFrame(list_container)
+        result_df.drop(columns=delete_key, inplace=True, axis=1)
+        grouped_df = result_df.groupby(aggregate_key).mean()
+        grouped_df = grouped_df.reset_index()
+        return grouped_df.to_dict(orient='records')
+
+
+
+def calculateScore(df, title, gendered_words):
     # iterate for gendered words
     bias_score_dict = dict()
     bias_score_dict["Attribute"] = df["Trait"].tolist()
@@ -167,6 +190,7 @@ def calculateScore(df, title, gendered_words=[["ছেলে", "মেয়ে"], 
         comparison_list.append(
             {
                 "gender": gender_word,
+                "gender_index": gendered_words.index(gender_word),
                 "mc_f": mc_f,
                 "fc_f": fc_f,
                 "mc_norm": mc_norm,
@@ -186,25 +210,84 @@ def calculateScore(df, title, gendered_words=[["ছেলে", "মেয়ে"], 
 
 
 if __name__ == '__main__':
-    csv_df_list = loadAllCSVfromFolder("./data")
-    avg_scores_for_title = []
-    for csv_df in csv_df_list:
-        title = csv_df["title"]
-        df = csv_df["df"]
-        print("Processing: ", title)
-        comparison_list, avg_score = calculateScore(df, title)
-        avg_scores_for_title.append(
-            {
-                "title": title,
-                "avg_": avg_score,
-            }
-        )
-        processed_data = formatProcessorForGenderedWords(comparison_list, title)
+    csv_df_groups = loadAllCSVfromFolder("./data")
+    gendered_words = getGenderedWords()
+
+    all_average_container = []
+    for group in csv_df_groups:
+        group_title = group["title"]
+        elements = group["group"]
+
+        avg_score_for_group = []
+        comparison_list_container = []
+
+        for element in elements:
+            element_title = element["title"]
+            df = element["df"]
+            print("Processing: ", element_title)
+            comparison_list, gender_avg_score = calculateScore(df, element_title, gendered_words=gendered_words)
+            
+            avg_score_for_group.append(
+                {
+                    "element_title": element_title,
+                    "avg_element": gender_avg_score,
+                }
+            )
+
+            comparison_list_container.append(*comparison_list)
+
+            processed_data = formatProcessorForGenderedWords(comparison_list, element_title)
+            createSubplotForPiePlot(processed_data)
+        
+        group_comparison_list = calculateListAvg(comparison_list_container, aggregate_key="gender_index", delete_key=["gender"])
+        
+        for item in group_comparison_list:
+            item["gender"] = gendered_words[item["gender_index"]]
+
+        grp_processed_data = formatProcessorForGenderedWords(group_comparison_list, group_title)
         createSubplotForPiePlot(processed_data)
 
-    # Create pieplot for avg data
-    avg_processed_data = formatProcessorForAvgScore(avg_scores_for_title, "Average For All Traits")
-    createSubplotForPiePlot(avg_processed_data)
+        group_average = calculateListAvg([x["avg_element"] for x in avg_score_for_group])
+        all_average_container.append(
+            {
+                "title": group_title,
+                "avg_": group_average
+            }
+        )
+
+    all_group_processed_data = formatProcessorForAvgScore(all_average_container, "Average For All Traits")
+    createSubplotForPiePlot(all_group_processed_data)
+
+
+
+
+    #     all_average_container.append(
+    #         {
+    #             "title": group_title,
+    #             "avg_": avg_dict_group
+    #         }
+    #     )
+
+    
+    
+    # avg_scores_for_title = []
+    # for csv_df in csv_df_list:
+    #     title = csv_df["title"]
+    #     df = csv_df["df"]
+    #     print("Processing: ", title)
+    #     comparison_list, avg_score = calculateScore(df, title)
+    #     avg_scores_for_title.append(
+    #         {
+    #             "title": title,
+    #             "avg_": avg_score,
+    #         }
+    #     )
+    #     processed_data = formatProcessorForGenderedWords(comparison_list, title)
+    #     createSubplotForPiePlot(processed_data)
+
+    # # Create pieplot for avg data
+    # avg_processed_data = formatProcessorForAvgScore(avg_scores_for_title, "Average For All Traits")
+    # createSubplotForPiePlot(avg_processed_data)
 
 
         
