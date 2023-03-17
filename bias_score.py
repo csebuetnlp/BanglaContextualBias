@@ -156,12 +156,20 @@ def calculateListAvg(list_container, aggregate_key = None, delete_key = None):
         result_dict = defaultdict(float)
         for item in list_container:
             for key, value in item.items():
-                result_dict[key] += value
+                if type(value) is list:
+                    result_dict[key] = [sum(elements) for elements in zip(result_dict[key], value)]
+                else:
+                    result_dict[key] += value
 
         total_dict = len(list_container)
-        average_dict = {key: value/total_dict for key, value in result_dict.items()}
+        for key, value in result_dict.items():
+            if type(value) is list:
+                result_dict[key] = [x/total_dict for x in value]
+            else:
+                result_dict[key] = value/total_dict
+        # average_dict = {key: value/total_dict for key, value in result_dict.items()}
 
-        return average_dict
+        return result_dict
     
     else:
         result_df = pd.DataFrame(list_container)
@@ -234,7 +242,7 @@ if __name__ == '__main__':
                 }
             )
 
-            comparison_list_container.append(*comparison_list)
+            comparison_list_container.extend(comparison_list)
 
             processed_data = formatProcessorForGenderedWords(comparison_list, element_title)
             createSubplotForPiePlot(processed_data)
