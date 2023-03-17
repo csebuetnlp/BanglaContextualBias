@@ -72,8 +72,8 @@ def formatProcessorForAvgScore(avg_score_list, title):
     return container
 
 def formatProcessorForGenderedWords(compare_list, title):
-    title = title.split("_")[:-1]
-    title = "_".join(title)
+    # title = title.split("_")[:-1]
+    # title = "_".join(title)
     container = {}
     container["title"] = title
     container["data"] = []

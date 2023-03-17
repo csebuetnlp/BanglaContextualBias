@@ -153,9 +153,12 @@ def calculateDfAverage(bias_score_list):
 
 def calculateListAvg(list_container, aggregate_key = None, delete_key = None):
     if aggregate_key is None:
-        result_dict = defaultdict(float)
+        result_dict = defaultdict()
         for item in list_container:
             for key, value in item.items():
+                if len(result_dict) == 0:
+                    result_dict[key] = value.copy(deep=True)
+                    continue
                 if type(value) is list:
                     result_dict[key] = [sum(elements) for elements in zip(result_dict[key], value)]
                 else:
