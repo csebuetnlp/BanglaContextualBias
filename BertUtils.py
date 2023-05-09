@@ -22,13 +22,16 @@ def get_sentence_tokens(sentence):
 
 
 def get_mask_index(input_token, last=False):
-    if not last:
-        mask_token_index = (input_token.input_ids == tokenizer.mask_token_id)[0].nonzero(as_tuple=True)[0]
-    else: # assuming there will always be 2 masks if last == True
-        # mask_token_index = (input_token.input_ids == tokenizer.mask_token_id)[0].nonzero(as_tuple=True)[0][-1:]
+  if not last:
+    mask_token_index = (input_token.input_ids == tokenizer.mask_token_id)[0].nonzero(as_tuple=True)[0]
+    if len(mask_token_index > 1) :
         mask_token_index = (input_token.input_ids == tokenizer.mask_token_id)[0].nonzero(as_tuple=True)[0][:1]
-  
-    return mask_token_index
+  else: # assuming there will always be 2 masks if last == True
+    mask_token_index = (input_token.input_ids == tokenizer.mask_token_id)[0].nonzero(as_tuple=True)[0][-1:]
+    # mask_token_index = (input_token.input_ids == tokenizer.mask_token_id)[0].nonzero(as_tuple=True)[0][:1]
+    # print(f'it: {mask_token_index}')
+#   print(f'mte: {mask_token_index}')
+  return mask_token_index
 
 
 def get_logits(input_token):
