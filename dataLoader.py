@@ -60,6 +60,7 @@ def processDFSentence(csv_files_list):
         columns.remove('Trait')
         df.drop(columns, axis=1, inplace=True)
         csv_file_list['df'] = df
+        csv_file_list['use_last_mask'] = False if sent_idx <=2 else True
 
     return csv_files_list
 
@@ -82,7 +83,6 @@ def loadAllCSVfromFolder(folderPath = 'data/'):
             {
                 "title": group_title,
                 "group": processDFSentence(csv_element),
-                "use_last_mask": False if i < 2 else True # hardcoded
             }
             
         )
