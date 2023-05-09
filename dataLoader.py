@@ -67,11 +67,13 @@ def processDFSentence(csv_files_list):
 
 def loadAllCSVfromFolder(folderPath = 'data/'):
     import os
+    # collects all the csv files from the folder
     files = os.listdir(folderPath)
     csvFiles = []
     for file in files:
         if file.endswith(".csv"):
             csvFiles.append(file)
+    
     csv_files_list = []
     for i in range(len(csvFiles)):
         csv_element = csvLoader(csvFiles[i])
@@ -80,6 +82,7 @@ def loadAllCSVfromFolder(folderPath = 'data/'):
             {
                 "title": group_title,
                 "group": processDFSentence(csv_element),
+                "use_last_mask": False if i < 2 else True # hardcoded
             }
             
         )

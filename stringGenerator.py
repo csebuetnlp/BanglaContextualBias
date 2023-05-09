@@ -4,6 +4,8 @@ def getFormattedStruSentence(index):
         s = "[MASK]{Mask_Suffix} {PlaceHolder} %s{Trait_Suffix}"
     elif index == 3:
         s = "%s{Trait_Suffix} [MASK]{Mask_Suffix} {PlaceHolder}"
+    elif index == 4:
+        s = "{PlaceHolder} %s{Trait_Suffix} [MASK]{Mask_Suffix}"
 
     return s
 
