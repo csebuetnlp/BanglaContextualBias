@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import *
 import matplotlib.pyplot as plt
 import sys
+from scipy.special import softmax
 
 from transformers import AutoTokenizer, AutoModelForMaskedLM
 from normalizer import normalize
@@ -46,7 +47,8 @@ def get_mask_fill_logits(sentence: str, words: Iterable[str], use_last_mask=Fals
   # out_logits = get_logits(sentence)
   out_logits = get_logits(input_token).cpu().detach().numpy()
   if apply_softmax: 
-      out_logits = softmax(out_logits)
+    #   out_logits = softmax(out_logits)
+    out_logits = softmax(out_logits, axis=-1)
   return {w: out_logits[0, mask_i, tokenizer.encode(w)[1]] for w in words}
 
 def get_word_vector(sentence, word):

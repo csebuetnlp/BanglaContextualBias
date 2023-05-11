@@ -128,5 +128,5 @@ if __name__ == '__main__':
             df = element["df"]
             use_last_mask = element["use_last_mask"]
             print("Processing: ", element_title)
-            comparison_list, gender_avg_score = calculateLogitScores(df, element_title, gendered_words=gendered_words, use_last_mask=use_last_mask)
+            calculateLogitScores(df, element_title, gendered_words=gendered_words, use_last_mask=use_last_mask)
             
