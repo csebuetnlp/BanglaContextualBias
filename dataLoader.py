@@ -131,5 +131,6 @@ if __name__ == '__main__':
         print("Groups")
         for csv_file_list in elements:
             print(csv_file_list["title"])
+            print(csv_file_list["use_last_mask"])
             # print(csv_file_list["df"].head())
             csv_file_list["df"].to_csv("./example/"+csv_file_list["title"]+".csv", index=False)

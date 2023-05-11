@@ -5,7 +5,7 @@ from collections import defaultdict
 import pandas as pd
 
 def bias_score(sentence: str, gender_words: Iterable[str], 
-               word: str, gender_comes_first=True) -> Dict[str, float]:
+               word: str, use_last_mask = False) -> Dict[str, float]:
     """
     Input a sentence of the form "GGG is XXX"
     XXX is a placeholder for the target word
@@ -25,7 +25,7 @@ def bias_score(sentence: str, gender_words: Iterable[str],
     # correct for this by masking the target word and measuring the prior probabilities
     subject_fill_prior_logits = get_mask_fill_logits(
         sentence.replace("XXX", "[MASK]").replace("GGG", "[MASK]"), 
-        gender_words, use_last_mask=not gender_comes_first,
+        gender_words, use_last_mask=use_last_mask,
     )
     subject_fill_bias_prior_correction = subject_fill_prior_logits[mw] - \
                                             subject_fill_prior_logits[fw]
@@ -51,6 +51,8 @@ def bias_score(sentence: str, gender_words: Iterable[str],
             "target_fill_bias": tgt_fill_bias,
             "female_fill_bias_prior": subject_fill_prior_logits[fw]
            }
+
+
 
 def bias_score_weat(sentence: str, gender_words: Iterable[Iterable[str]], 
                word: str, gender_comes_first=True) -> Dict[str, float]:
@@ -89,27 +91,29 @@ def bias_score_weat(sentence: str, gender_words: Iterable[Iterable[str]],
           "bias_prior_corrected": subject_fill_bias - subject_fill_bias_prior_correction,
           }
 
-def getFillScore(df, gender_words):
+def getFillScore(df, gender_words, use_last_mask=False):
     mc = 0
     fc = 0
     score = []
     female_fill_bias = []
+    male_fill_bias = []
     #iterate over the dataframe rows
     for index, row in df.iterrows():
         trait = row['Trait']
         mask_sentence = row['Mask_Sent']
-        fill_bias = get_mask_fill_logits(mask_sentence%(trait), gender_words)
+        fill_bias = get_mask_fill_logits(mask_sentence%(trait), gender_words, use_last_mask=use_last_mask)
         fill_score = fill_bias[gender_words[0]] - fill_bias[gender_words[1]] 
         score.append(fill_score)
         if fill_score>=0:
             mc+=1
         else:
             fc+=1
+        male_fill_bias.append(fill_bias)
         female_fill_bias.append(fill_bias[gender_words[1]])
     return score, mc, fc, female_fill_bias
 
 
-def getBiasNormScore(df, gender_words):
+def getBiasNormScore(df, gender_words, use_last_mask=False):
     mc = 0
     fc= 0
     score = []
@@ -118,7 +122,7 @@ def getBiasNormScore(df, gender_words):
     for index, row in df.iterrows():
         trait = row['Trait']
         bais_sentence = row['Bias_Sent']
-        ans = bias_score(bais_sentence, gender_words, trait)
+        ans = bias_score(bais_sentence, gender_words, trait, use_last_mask=use_last_mask)
         prior_score= ans['gender_fill_bias_prior_corrected']
         score.append(prior_score)
         if prior_score>=0:
@@ -183,15 +187,15 @@ def calculateListAvg(list_container, aggregate_key = None, delete_key = None):
 
 
 
-def calculateScore(df, title, gendered_words):
+def calculateScore(df, title, gendered_words, use_last_mask=False):
     # iterate for gendered words
     bias_score_dict = dict()
     bias_score_dict["Attribute"] = df["Trait"].tolist()
     bias_score_list = []
     comparison_list = []
     for gender_word in gendered_words:
-        fill_scores, mc_f, fc_f, _ = getFillScore(df, gender_words=gender_word)
-        norm_score, mc_norm, fc_norm, _ = getBiasNormScore(df, gender_words=gender_word)
+        fill_scores, mc_f, fc_f, _ = getFillScore(df, gender_words=gender_word, use_last_mask=use_last_mask)
+        norm_score, mc_norm, fc_norm, _ = getBiasNormScore(df, gender_words=gender_word, use_last_mask=use_last_mask)
         bias_score_list.append(
             {
                 "fill_score": fill_scores,
@@ -220,6 +224,7 @@ def calculateScore(df, title, gendered_words):
     return comparison_list, avg_score
 
 
+
 if __name__ == '__main__':
     csv_df_groups = loadAllCSVfromFolder("./data")
     gendered_words = getGenderedWords()
@@ -235,8 +240,9 @@ if __name__ == '__main__':
         for element in elements:
             element_title = element["title"]
             df = element["df"]
+            use_last_mask = element["use_last_mask"]
             print("Processing: ", element_title)
-            comparison_list, gender_avg_score = calculateScore(df, element_title, gendered_words=gendered_words)
+            comparison_list, gender_avg_score = calculateScore(df, element_title, gendered_words=gendered_words, use_last_mask = use_last_mask)
             
             avg_score_for_group.append(
                 {
