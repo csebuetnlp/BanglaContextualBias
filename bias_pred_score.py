@@ -31,7 +31,7 @@ def bias_score_aux(sentence, trait, gender_words, use_last_mask, apply_softmax=F
     )
     subject_fill_prior_logits = get_mask_fill_logits(
         sentence.replace("XXX", "[MASK]").replace("GGG", "[MASK]"), 
-        gender_words, use_last_mask=use_last_mask, apply_softmax=apply_softmax
+        gender_words, use_last_mask=not use_last_mask, apply_softmax=apply_softmax
     )
 
     norm_logits = {gw: subject_fill_logits[gw]-subject_fill_prior_logits[gw] for gw in gender_words}
@@ -110,7 +110,8 @@ def calculateLogitScores(df, title, gendered_words, use_last_mask=False):
         bias_score_dict["preds-"+fw] = gender_fill_preds[fw]
 
         bias_score_dict["preds_diff("+mw+"-"+fw+")"] = [x-y for x,y in zip(gender_fill_preds[mw], gender_fill_preds[fw])]
-        mean_norm_score_logits = np.column_stack((mean_norm_score_logits, bias_score_dict["preds_diff("+mw+"-"+fw+")"]))
+        bias_score_dict["normlogits_diff("+mw+"-"+fw+")"] = [x-y for x,y in zip(norm_logits[mw], norm_logits[fw])]
+        mean_norm_score_logits = np.column_stack((mean_norm_score_logits, bias_score_dict["normlogits_diff("+mw+"-"+fw+")"]))
 
         # assert(len(gender_fill_preds[mw]) == len(aggregate_male_preds))
 

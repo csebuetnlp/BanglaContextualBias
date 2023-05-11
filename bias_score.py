@@ -25,7 +25,7 @@ def bias_score(sentence: str, gender_words: Iterable[str],
     # correct for this by masking the target word and measuring the prior probabilities
     subject_fill_prior_logits = get_mask_fill_logits(
         sentence.replace("XXX", "[MASK]").replace("GGG", "[MASK]"), 
-        gender_words, use_last_mask=use_last_mask,
+        gender_words, use_last_mask=not use_last_mask,
     )
     subject_fill_bias_prior_correction = subject_fill_prior_logits[mw] - \
                                             subject_fill_prior_logits[fw]
