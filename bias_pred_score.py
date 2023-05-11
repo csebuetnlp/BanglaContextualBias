@@ -3,6 +3,7 @@ from dataLoader import *
 from dataVisualizer import *
 from collections import defaultdict
 import pandas as pd
+import numpy as np 
 
 def convertToDictOfLists(container):
     '''
@@ -16,6 +17,12 @@ def convertToDictOfLists(container):
             else:
                 dict_of_lists[k] = [v] 
     return dict_of_lists
+
+def getNormalizedPredsValue(male_preds, female_preds):
+    normalizedMalePreds = (male_preds)/(male_preds+female_preds)
+    normalizedFemalePreds = (female_preds)/(male_preds+female_preds)
+
+    return normalizedMalePreds.tolist(), normalizedFemalePreds.tolist()
 
 def bias_score_aux(sentence, trait, gender_words, use_last_mask, apply_softmax=False, calc_tgt_fill_prob=False):
     subject_fill_logits = get_mask_fill_logits(
@@ -84,6 +91,11 @@ def calculateLogitScores(df, title, gendered_words, use_last_mask=False):
     gender_fill_logits, gender_fill_preds = getFillScore(df, gendered_words, use_last_mask)
     norm_logits, norm_preds, target_fill_prob = getBiasNormScore(df, gendered_words, use_last_mask)
     
+    aggregate_male_preds = np.ones(len(bias_score_dict["Attribute"])) * 1e5
+    aggregate_female_preds = np.ones(len(bias_score_dict["Attribute"])) * 1e5
+
+    mean_norm_score = np.zeros((len(bias_score_dict["Attribute"]), 1), dtype=np.float32)
+
     for i in range(0, len(gendered_words), 2):
         mw = gendered_words[i]
         fw = gendered_words[i+1]
@@ -96,11 +108,27 @@ def calculateLogitScores(df, title, gendered_words, use_last_mask=False):
         bias_score_dict["preds-"+mw] = gender_fill_preds[mw]
         bias_score_dict["preds-"+fw] = gender_fill_preds[fw]
 
+        assert(len(gender_fill_preds[mw]) == len(aggregate_male_preds))
+
+        aggregate_male_preds = aggregate_male_preds*gender_fill_preds[mw]
+        aggregate_female_preds = aggregate_female_preds*gender_fill_preds[fw]
+
         bias_score_dict["normpreds-"+mw] = norm_preds[mw]
         bias_score_dict["normpreds-"+fw] = norm_preds[fw]
 
+        bias_score_dict["normpreds_diff("+mw+"-"+fw+")"] = norm_preds[mw] - norm_preds[fw]
+        mean_norm_score = np.column_stack((mean_norm_score, norm_preds[mw] - norm_preds[fw]))
+
         bias_score_dict["tgtfillprob-"+mw] = target_fill_prob[mw]
         bias_score_dict["tgtfillprob-"+fw] = target_fill_prob[fw]
+
+    bias_score_dict["Bias_Score(Male_Aggregate)"], bias_score_dict["Bias_Score(Female_Aggregate)"] = \
+    getNormalizedPredsValue(aggregate_male_preds, aggregate_female_preds)
+     
+    mean_norm_score = np.delete(mean_norm_score, 0, axis=1)
+    mean_norm_score = np.mean(mean_norm_score, axis=1)
+
+    bias_score_dict["Mean_Norm_Score"] = mean_norm_score.tolist()
 
     score_df = pd.DataFrame(bias_score_dict)
     score_df.to_csv("./results_new/"+title+"_scores.csv", index=False)
