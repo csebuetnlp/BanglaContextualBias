@@ -98,6 +98,7 @@ def getBiasNormScore(df, gender_words, use_last_mask):
     for index, row in df.iterrows():
         trait = row["Trait"]
         bias_sentence = row["Bias_Sent"]
+
         norm_logits, _ = bias_score_aux(
             bias_sentence, trait, gender_words, use_last_mask=use_last_mask
         )
@@ -134,7 +135,7 @@ def calculateLogitScores(df, title, gendered_words, use_last_mask=False):
     # aggregate_male_preds = np.ones(len(bias_score_dict["Attribute"])) * 1e5
     # aggregate_female_preds = np.ones(len(bias_score_dict["Attribute"])) * 1e5
 
-    aggregate_male_preds = np.zeros(len(bias_score_dict["Attribute"])) 
+    aggregate_male_preds = np.zeros(len(bias_score_dict["Attribute"]))
     aggregate_female_preds = np.zeros(len(bias_score_dict["Attribute"]))
 
     mean_norm_score = np.zeros((len(bias_score_dict["Attribute"]), 1), dtype=np.float32)

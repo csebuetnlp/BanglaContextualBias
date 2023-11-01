@@ -65,7 +65,7 @@ def processDFSentence(csv_files_list):
             axis=1,
         )
         df["Bias_Sent"] = df.apply(
-            lambda row: fillSentence(mask_sent, row, sent_idx),
+            lambda row: fillSentence(bias_sent, row, sent_idx),
             axis=1,
         )
         columns.remove("Trait")
