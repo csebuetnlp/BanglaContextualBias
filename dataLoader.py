@@ -2,95 +2,105 @@ import pandas as pd
 import os
 from stringGenerator import getFormattedStruSentence, processTraitSuffix
 
+
 def getDfColumnSets(all_columns):
-    '''
+    """
     each df has different structure of sentences
-    this function packs the necessary columns into a set 
+    this function packs the necessary columns into a set
     and then to a list of sets
-    '''
-    num_sets = (len(all_columns)-1)//3
-    columns_set = [['Trait'] for i in range(num_sets)]
-    assert(len(columns_set) == num_sets)
+    """
+    num_sets = (len(all_columns) - 1) // 3
+    columns_set = [["Trait"] for i in range(num_sets)]
+    assert len(columns_set) == num_sets
 
     for column in all_columns:
-        if column == 'Trait':
+        if column == "Trait":
             continue
         else:
-            idx = int(column[1])-1
-            columns_set[idx].append(column)  
+            idx = int(column[1]) - 1
+            columns_set[idx].append(column)
     return columns_set
 
-def csvLoader(filename, defaultPath = './data/'):
+
+def csvLoader(filename, defaultPath="./data/"):
     df = pd.read_csv(os.path.join(defaultPath, filename))
     csv_elements_list = []
     column_sets = getDfColumnSets(df.columns)
     for column_set in column_sets:
         df_aux = df[column_set]
         csv_elements_list.append(
-            {
-                "df": df_aux,
-                "title": filename.split('.')[0]+"_"+column_set[1][:2]
-            }
+            {"df": df_aux, "title": filename.split(".")[0] + "_" + column_set[1][:2]}
         )
     return csv_elements_list
 
 
+def fillSentence(sentence, row, sent_idx):
+    """
+    This function fills the sentence with the values from the row
+    """
+    sentence = sentence.format(
+        Mask_Suffix=row["S" + str(sent_idx) + "_" + "Mask_Suffix"],
+        PlaceHolder=row["S" + str(sent_idx) + "_" + "Placeholder"].strip(),
+        Trait_Suffix=processTraitSuffix(
+            row["S" + str(sent_idx) + "_" + "Trait_Suffix"]
+        ),
+    )
+
+    return sentence
+
+
 def processDFSentence(csv_files_list):
-    '''
-        This function processes each dataframe to have Mask_Sent and Bias_Sent
-    '''
+    """
+    This function processes each dataframe to have Mask_Sent and Bias_Sent
+    """
     for csv_file_list in csv_files_list:
         df = csv_file_list["df"]
         df.fillna("", inplace=True)
         columns = df.columns.tolist()
-        # print(columns)
         sent_idx = int(csv_file_list["title"][-1])
         mask_sent = getFormattedStruSentence(sent_idx)
         bias_sent = mask_sent.replace("[MASK]", "GGG").replace("%s", "XXX")
-        df["Mask_Sent"] = df.apply(lambda row: mask_sent.format(
-            Mask_Suffix=row["S"+str(sent_idx)+"_"+"Mask_Suffix"],
-            PlaceHolder=row["S"+str(sent_idx)+"_"+"Placeholder"].strip(),
-            Trait_Suffix=processTraitSuffix(row["S"+str(sent_idx)+"_"+"Trait_Suffix"]),
-        ), axis=1)
-        df["Bias_Sent"] = df.apply(lambda row: bias_sent.format(
-            Mask_Suffix=row["S"+str(sent_idx)+"_"+"Mask_Suffix"],
-            PlaceHolder=row["S"+str(sent_idx)+"_"+"Placeholder"].strip(),
-            Trait_Suffix=processTraitSuffix(row["S"+str(sent_idx)+"_"+"Trait_Suffix"]),
-        ), axis=1)
-        columns.remove('Trait')
+        df["Mask_Sent"] = df.apply(
+            lambda row: fillSentence(mask_sent, row, sent_idx),
+            axis=1,
+        )
+        df["Bias_Sent"] = df.apply(
+            lambda row: fillSentence(mask_sent, row, sent_idx),
+            axis=1,
+        )
+        columns.remove("Trait")
         df.drop(columns, axis=1, inplace=True)
-        csv_file_list['df'] = df
-        csv_file_list['use_last_mask'] = False if sent_idx <=2 else True
-
+        csv_file_list["df"] = df
+        csv_file_list["use_last_mask"] = False if sent_idx <= 2 else True
     return csv_files_list
 
 
-
-def loadAllCSVfromFolder(folderPath = 'data/'):
+def loadAllCSVfromFolder(folderPath="data/"):
     import os
+
     # collects all the csv files from the folder
     files = os.listdir(folderPath)
     csvFiles = []
     for file in files:
         if file.endswith(".csv"):
             csvFiles.append(file)
-    
+
     csv_files_list = []
     for i in range(len(csvFiles)):
         csv_element = csvLoader(csvFiles[i])
-        group_title = csvFiles[i].split('.')[0]
+        group_title = csvFiles[i].split(".")[0]
         csv_files_list.append(
             {
                 "title": group_title,
                 "group": processDFSentence(csv_element),
             }
-            
         )
-    
+
     # return csv_files_list
     return csv_files_list
 
-'''
+
+"""
 csv_files_list = [
     {
         "title": "group_title",
@@ -117,13 +127,14 @@ csv_files_list = [
 
 ]
 
-'''
+"""
+
 
 def getGenderedWords():
     return [["ছেলে", "মেয়ে"], ["পুরুষ", "নারী"]]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     csv_files_list = loadAllCSVfromFolder()
     for csv_file in csv_files_list:
         print(csv_file["title"])
@@ -133,4 +144,6 @@ if __name__ == '__main__':
             print(csv_file_list["title"])
             print(csv_file_list["use_last_mask"])
             # print(csv_file_list["df"].head())
-            csv_file_list["df"].to_csv("./example/"+csv_file_list["title"]+".csv", index=False)
+            csv_file_list["df"].to_csv(
+                "./example/" + csv_file_list["title"] + ".csv", index=False
+            )
