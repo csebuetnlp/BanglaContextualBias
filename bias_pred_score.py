@@ -212,6 +212,7 @@ if __name__ == "__main__":
     for lst in gendered_words_list:
         gendered_words.extend(lst)
 
+    # gendered words take a list of all the lists inside the generated list
     all_average_container = []
     for group in csv_df_groups:
         group_title = group["title"]
