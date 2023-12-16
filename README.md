@@ -1,5 +1,5 @@
 # BanglaBertBiasDetection
-A repository for the bias detection in Bangla Language Model
+A repository for the bias detection in Bangla Language Models. Methods include WEAT, SEAT, CEAT and Log Probability Bias Score. 
 
 ## Requirements
 All the requirements are given in the `requirements.txt` file. To install the requirements, run the following command:
@@ -16,8 +16,8 @@ The full dataset is not uploaded due to the size of the dataset. CEAT datasets t
 The experiments were conducted taking positive and negative traits from `data\positive_traits_bn.csv` and `data\negative_traits_bn.csv` respectively. 
 
 ## Usage
-### WEAT Test
-Details for WEAT test are given in `Notebooks/Exposing_Bias_by_WEAT_Test.ipynb` file.
+### WEAT and SEAT 
+Details for WEAT and SEAT are given in `Notebooks/Exposing_Bias_by_WEAT_Test.ipynb` file.
 ### CEAT : Sentence Extraction
 For extracting sentences from a single file, run the following command:
 ```
