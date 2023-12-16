@@ -17,7 +17,7 @@ The experiments were conducted taking positive and negative traits from `data\po
 
 ## Usage
 ### WEAT and SEAT 
-Details for WEAT and SEAT are given in `Notebooks/Exposing_Bias_by_WEAT_Test.ipynb` file.
+Details for WEAT and SEAT are given in `Notebooks/WEAT_&_SEAT_experiments_on_Bangla.ipynb` file.
 ### CEAT : Sentence Extraction
 For extracting sentences from a single file, run the following command:
 ```
@@ -51,5 +51,5 @@ python ./bias_pred_score.py
 ```
 This will take data from `data\positive_traits_bn.csv` and `data\negative_traits_bn.csv` files and calculate the log probability bias score for each model. The scores are stored in `results` folder for definite model.
 ### Logprob : Metric Calculation
-Further analysis of data are found in `Notebooks/Exposing_Bias_in_BanglaLanguageModels.ipynb` and `Notebooks/Data_Analytics_for_bangla_bias_detection.ipynb` notebooks.
+Further analysis of data are found in `Notebooks/Exposing_Bias_in_BanglaLanguageModels.ipynb`, `Notebooks/Data_Analytics_for_bangla_bias_detection.ipynb` and `Notebooks/Log_Probability_bias_for_all_Categories_in_Bangla.ipynb` notebooks.
 
