@@ -201,7 +201,7 @@ def calculateLogitScores(df, title, gendered_words, use_last_mask=False):
     bias_score_dict["Mean_Norm_Score(Preds)"] = mean_norm_score.tolist()
 
     score_df = pd.DataFrame(bias_score_dict)
-    score_df.to_csv("./results_new/" + title + "_scores.csv", index=False)
+    score_df.to_csv("./results/" + title + "_scores.csv", index=False)
 
 
 if __name__ == "__main__":
