@@ -1,4 +1,4 @@
-from BertUtils import *
+from LogProbCalculations.BertUtils import *
 from dataLoader import *
 from dataVisualizer import *
 from bias_score import bias_score_weat

@@ -4,7 +4,7 @@ A repository for the bias detection in Bangla Language Models. Methods include W
 ## Requirements
 All the requirements are given in the `requirements.txt` file. To install the requirements, run the following command:
 ```console
-./installation.sh
+bash ./installation.sh
 ```
 
 ## Data
