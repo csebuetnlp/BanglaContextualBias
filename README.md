@@ -12,10 +12,16 @@ This is the official repository containing all codes used to generate the result
     - [Word Embedding Association Test (WEAT)](#word-embedding-association-test-weat)
     - [Sentence Embedding Association Test (SEAT)](#sentence-embedding-association-test-seat)
     - [Contextualized Embedding Association Test (CEAT)](#contextualized-embedding-association-test-ceat)
+        - [CEAT : Sentence Extraction](#ceat--sentence-extraction)
+        - [CEAT : Embedding Extraction](#ceat--embedding-extraction)
+        - [CEAT : Metric Calculation](#ceat--metric-calculation)
     - [Log Probability Bias Score](#log-probability-bias-score)
+        - [Logprob : Data Extraction](#logprob--data-extraction)
+        - [Logprob : Metric Calculation](#logprob--metric-calculation)
+        - [Prior Bias Score vs Corrected Bias Score diagrams](#prior-bias-score-vs-corrected-bias-score-diagrams)
     - [Method Comparisons](#method-comparisons)
-    - [Acknowledgement]()
-    - [License]()
+    - [License](#license)
+    - [Citation](#citation)
 
 
 ## Setup
@@ -72,11 +78,13 @@ The Contextualized Embedding Association Test (CEAT) is a method to account for 
 
 Firstly, we create categories of suffixes that are available in Bangla keeping in mind the possible words that we are going to use for our experiments. The idea is to perform exact string seach for the words. This is because we want the sentences that have our required words in root form or suffix added form. Stemming the sentences first and then perform searching is not a good option for us because (1) it is very expensive to perform stemming on each word on a very large dataset (2) stemming sentences produces erroneous results for Bangla that changes the whole semantics of the sentence. 
 
+The suffix caegories can be found in `./CeatDataCollection/suffixCategories.jsonl`. The code for applying the categories to are in `./CeatDataCollection/AddingSuffixCategoryToWord.py`. For that we need a file like `./CeatDataCollection/WeatWords/allWeatWords.txt` where we need to mention which word should contain which suffix category in the format: `<word> <category_serial>`.The result should be a file like `weatWordsWithSuffix.jsonl`.
+
 For extracting sentences from a single file, run the following command:
 ```
 python ./CEATDataCollection/extractSentences.py -f <path_to_file>
 ```
-For extracting sentences for multiple files from multiple directories, run the following command:
+For extracting sentences from multiple files that are in multiple directories, run the following command:
 ```
 python ./CEATDataCollection/extractSentences.py -dir <path_to_dir1> <path_to_dir2> ... <path_to_dirN>
 ```
@@ -85,20 +93,24 @@ After extracting the sentences, all the sentences are combined using the followi
 python ./CEATDataCollection/combineResults.py
 ```
 The combined results are stored in `CEATDataCollection/results/results_trait.pkl` file. During combining, all the data are collected from folders where `sentences.csv` file exists.
+
 ### CEAT : Embedding Extraction
-For extracting embeddings from a , run the following command:
+For extracting embeddings from models, run the following command:
 ```
 python ./CEATDataCollection/extractEmbeddings.py -l <segment_length>
 ```
-This will take data from `CEATDataCollection/results/results_trait.pkl` file and extract embeddings for each sentence. The embeddings are stored in `CEATDataCollection/embeddings` folder for all models.
+This will take data from `CEATDataCollection/results/results_trait.pkl` file and extract embeddings for each sentence after precessing the sentences to the designated length. The required WEAT word is kept at the middle of the sentence. The embeddings are stored in `CEATDataCollection/embeddings` folder for all models. For changing the list of models of which the embedding should be extracted, it needs to be mentioned in the main function of the python file. 
+
 ### CEAT : Metric Calculation
 The metric calculation is done using the following command:
 ```
 python ./CeatDataCollection/CEATCalculations.py
 ```
-This will take data from `CEATDataCollection/results/results_trait.pkl` file and calculate the metrics for each model. The metrics are stored in `CEATDataCollection/results` folder for all models.
+This will take data from `CEATDataCollection/results/results_trait.pkl` file and calculate the metrics for each model. The metrics are stored in `CEATDataCollection/results` folder for all models. The statistics we ge as a result are efect values for each category of words and their p-values. The number of samples to take needs to be defined inside the file. 
 
 ![CEAT Data Table](figures/CEAT_Table.png)
+***Figure**: CEAT results for the models used in our experiments for sample size N=5000 and segment lengths 9 and 75*
+
 
 ## Log Probability Bias Score
 
@@ -125,7 +137,7 @@ Further analysis of data are found in `Notebooks/Exposing_Bias_in_BanglaLanguage
 </p>
 
 
-*Figure: Prior Bias Score vs Corrected Bias Score diagrams for sentence structures S1 to S5 and negative traits. Experiment run on **BanglaBERT** (Large) Generator.*
+*Figure: Prior Bias Score vs Corrected Bias Score diagrams for sentence structures S1 to S5 on negative traits. Experiment run on **BanglaBERT** (Large) Generator.*
 
 
 ## Method Comparisons
@@ -142,7 +154,7 @@ Further analysis of data are found in `Notebooks/Exposing_Bias_in_BanglaLanguage
 | C8: Science/Art (Male/Female terms)             | -0.22           | -0.20        | -0.76 | 0.366*| 0.98*                |
 | C9: Science/Art (Male/Female names)             | 0.23            | -1.03        | -1.13 | -0.591*| 0.70*               |
 
-*Effect size of bias measurements for various experiments (\* indicates statistically significant at p < 0.05)*
+***Figure**:Effect size of bias measurements for various experiments (\* indicates statistically significant at p < 0.05)*
 
 ## License
 Contents of this repository are restricted to non-commercial research purposes only under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License (CC BY-NC-SA 4.0)](https://creativecommons.org/licenses/by-nc-sa/4.0/). 
