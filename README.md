@@ -53,17 +53,25 @@ The dataset includes the data for:
 
 ## Word Embedding Association Test (WEAT)
 
-The WEAT test is the most basic experiment with static GloVe embeddings and weat categories. The experiment is conducted with categorical words that are included in the dataset and determining the effect size (d) with two contrasting categories (`Target vs. Attribute`)
+The Word Embedding Association Test (WEAT) is a method used to detect biases in word embeddings by examining the associations between different sets of words. It quantifies the extent to which certain attributes (e.g., `pleasant/unpleasant`, `career/family`) are linked with specific target concepts (e.g., `gender`, `race`) in the embeddings. By measuring the cosine similarities between word vectors, WEAT helps reveal and quantify implicit biases embedded within word representations.
 
 Codes for WEAT experiment are given in `Notebooks/WEAT_&_SEAT_experiments_on_Bangla.ipynb` file.
 
 ## Sentence Embedding Association Test (SEAT)
 
+The Sentence Embedding Association Test (SEAT) is a method used to measure biases in sentence embeddings. It evaluates the extent to which sentence embeddings associate certain attributes (e.g., `pleasant/unpleasant`, `career/family`) with specific target concepts (e.g., `gender`, `race`). By comparing the similarity of embeddings between different attribute-target pairs, SEAT helps identify and quantify biases present in sentence-level representations.
 
+
+Codes for SEAT experiment are given in `Notebooks/WEAT_&_SEAT_experiments_on_Bangla.ipynb` file.
 
 ## Contextualized Embedding Association Test (CEAT)
 
+The Contextualized Embedding Association Test (CEAT) is a method to account for the random effects that arise while determining effect size in WEAT test. The procedure we followed for generating results on CEAT test involve the sections below.
+
 ### CEAT : Sentence Extraction
+
+Firstly, we create categories of suffixes that are available in Bangla keeping in mind the possible words that we are going to use for our experiments. The idea is to perform exact string seach for the words. This is because we want the sentences that have our required words in root form or suffix added form. Stemming the sentences first and then perform searching is not a good option for us because (1) it is very expensive to perform stemming on each word on a very large dataset (2) stemming sentences produces erroneous results for Bangla that changes the whole semantics of the sentence. 
+
 For extracting sentences from a single file, run the following command:
 ```
 python ./CEATDataCollection/extractSentences.py -f <path_to_file>
@@ -90,7 +98,7 @@ python ./CeatDataCollection/CEATCalculations.py
 ```
 This will take data from `CEATDataCollection/results/results_trait.pkl` file and calculate the metrics for each model. The metrics are stored in `CEATDataCollection/results` folder for all models.
 
-
+![CEAT Data Table](figures/CEAT_Table.png)
 
 ## Log Probability Bias Score
 
