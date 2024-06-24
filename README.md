@@ -104,6 +104,20 @@ This will take data from `data\positive_traits_bn.csv` and `data\negative_traits
 Further analysis of data are found in `Notebooks/Exposing_Bias_in_BanglaLanguageModels.ipynb`, `Notebooks/Data_Analytics_for_bangla_bias_detection.ipynb` and `Notebooks/Log_Probability_bias_for_all_Categories_in_Bangla.ipynb` notebooks.
 
 
+### Prior Bias Score vs Corrected Bias Score diagrams
+
+<p align="center">
+  <img src="figures/BBGenNeg/hexplot_Negative_Traits_S1.png" width="30%" alt="S1">
+  <img src="figures/BBGenNeg/hexplot_Negative_Traits_S2.png" width="30%" alt="S2">
+  <img src="figures/BBGenNeg/hexplot_Negative_Traits_S3.png" width="30%" alt="S3">
+</p>
+<p align="center">
+  <img src="figures/BBGenNeg/hexplot_Negative_Traits_S4.png" width="30%" alt="S4">
+  <img src="figures/BBGenNeg/hexplot_Negative_Traits_S5.png" width="30%" alt="S5">
+</p>
+
+
+*Figure: Prior Bias Score vs Corrected Bias Score diagrams for sentence structures S1 to S5 and negative traits. Experiment run on **BanglaBERT** (Large) Generator.*
 
 
 ## Method Comparisons
@@ -129,7 +143,7 @@ Contents of this repository are restricted to non-commercial research purposes o
 
 
 ## Citation
-If you use any of the datasets, models or code modules, please cite the following paper:
+If you use any of the datasets or code modules or use our work as a reference, please cite the following paper:
 ```
 To be added
 ```
