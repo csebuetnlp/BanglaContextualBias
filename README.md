@@ -1,6 +1,6 @@
 # Bangla Contextual Bias
 
-This is the official repository containing all codes used to generate the results reported in the paper titled **"An Empirical Study on the Characteristics of Bias upon Context Length Variation for Bangla"** published in *Findings of the Association for Computational Linguistics: ACL 2024*
+This is the official repository containing all codes used to generate the results reported in the paper titled **["An Empirical Study on the Characteristics of Bias upon Context Length Variation for Bangla"](https://arxiv.org/abs/2406.17375)** accepted in *Findings of the Association for Computational Linguistics: ACL 2024*
 
 ## Table of Contents
 
@@ -76,9 +76,9 @@ The Contextualized Embedding Association Test (CEAT) is a method to account for 
 
 ### CEAT : Sentence Extraction
 
-Firstly, we create categories of suffixes that are available in Bangla keeping in mind the possible words that we are going to use for our experiments. The idea is to perform exact string seach for the words. This is because we want the sentences that have our required words in root form or suffix added form. Stemming the sentences first and then perform searching is not a good option for us because (1) it is very expensive to perform stemming on each word on a very large dataset (2) stemming sentences produces erroneous results for Bangla that changes the whole semantics of the sentence. 
+Firstly, we create categories of suffixes that are available in Bangla keeping in mind the possible words that we are going to use for our experiments. The idea is to perform exact string seach for the words. This is because we want the sentences that have our required words in root form or suffix added form. Searching after stemming the sentences is not a good option for us because (1) it is very expensive to perform stemming on each word on a very large dataset and (2) stemming sentences produces erroneous results for Bangla that changes the whole semantics of the sentence. 
 
-The suffix caegories can be found in `./CeatDataCollection/suffixCategories.jsonl`. The code for applying the categories to are in `./CeatDataCollection/AddingSuffixCategoryToWord.py`. For that we need a file like `./CeatDataCollection/WeatWords/allWeatWords.txt` where we need to mention which word should contain which suffix category in the format: `<word> <category_serial>`.The result should be a file like `weatWordsWithSuffix.jsonl`.
+The suffix categories can be found in `./CeatDataCollection/suffixCategories.jsonl`. The code for applying the categories to are in `./CeatDataCollection/AddingSuffixCategoryToWord.py`. For that, we need a file like `./CeatDataCollection/WeatWords/allWeatWords.txt` where we need to mention which word should contain which suffix category in the format: `<word> <category_serial>`.The result should be a file like `weatWordsWithSuffix.jsonl`.
 
 For extracting sentences from a single file, run the following command:
 ```
@@ -99,14 +99,14 @@ For extracting embeddings from models, run the following command:
 ```
 python ./CEATDataCollection/extractEmbeddings.py -l <segment_length>
 ```
-This will take data from `CEATDataCollection/results/results_trait.pkl` file and extract embeddings for each sentence after precessing the sentences to the designated length. The required WEAT word is kept at the middle of the sentence. The embeddings are stored in `CEATDataCollection/embeddings` folder for all models. For changing the list of models of which the embedding should be extracted, it needs to be mentioned in the main function of the python file. 
+This will take data from `CEATDataCollection/results/results_trait.pkl` file and extract embeddings for each sentence after processing the sentences to the designated length. The required WEAT word is kept at the middle of the sentence. The embeddings are stored in `CEATDataCollection/embeddings` folder for all models. Changing the list of models for which the embedding should be extracted needs to be mentioned in the main function of the python file. 
 
 ### CEAT : Metric Calculation
 The metric calculation is done using the following command:
 ```
 python ./CeatDataCollection/CEATCalculations.py
 ```
-This will take data from `CEATDataCollection/results/results_trait.pkl` file and calculate the metrics for each model. The metrics are stored in `CEATDataCollection/results` folder for all models. The statistics we ge as a result are efect values for each category of words and their p-values. The number of samples to take needs to be defined inside the file. 
+This will take data from `CEATDataCollection/results/results_trait.pkl` file and calculate the metrics for each model. The metrics are stored in `CEATDataCollection/results` folder for all models. The statistics we'll get as a result are effect values for each category of words and their p-values. The number of samples to take needs to be defined inside the file. 
 
 ![CEAT Data Table](figures/CEAT_Table.png)
 ***Figure**: CEAT results for the models used in our experiments for sample size N=5000 and segment lengths 9 and 75*
@@ -119,9 +119,9 @@ Extracting the values for log probability bias score can be done using the follo
 ```
 python ./bias_pred_score.py
 ```
-This will take data from `data\positive_traits_bn.csv` and `data\negative_traits_bn.csv` files and calculate the log probability bias score for each model. The scores are stored in `results` folder for definite model.
-### Logprob : Metric Calculation
-Further analysis of data are found in `Notebooks/Exposing_Bias_in_BanglaLanguageModels.ipynb`, `Notebooks/Data_Analytics_for_bangla_bias_detection.ipynb` and `Notebooks/Log_Probability_bias_for_all_Categories_in_Bangla.ipynb` notebooks.
+This will take data from `data/positive_traits_bn.csv` and `data/negative_traits_bn.csv` files and calculate the log probability bias score for each model. The scores are stored in `results` folder for definite model.
+### Logprob: Metric Calculation
+Further analysis of data can be found in `Notebooks/Exposing_Bias_in_BanglaLanguageModels.ipynb`, `Notebooks/Data_Analytics_for_bangla_bias_detection.ipynb` and `Notebooks/Log_Probability_bias_for_all_Categories_in_Bangla.ipynb` notebooks.
 
 
 ### Prior Bias Score vs Corrected Bias Score diagrams
