@@ -165,5 +165,13 @@ Contents of this repository are restricted to non-commercial research purposes o
 ## Citation
 If you use any of the datasets or code modules or use our work as a reference, please cite the following paper:
 ```
-To be added
+@misc{sadhu2024empiricalstudycharacteristicsbias,
+      title={An Empirical Study on the Characteristics of Bias upon Context Length Variation for Bangla}, 
+      author={Jayanta Sadhu and Ayan Antik Khan and Abhik Bhattacharjee and Rifat Shahriyar},
+      year={2024},
+      eprint={2406.17375},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+      url={https://arxiv.org/abs/2406.17375}, 
+}
 ```
